@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Data Visualizer</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, sans-serif; color: #17243a; background: #f3f6fa; }
+    body { margin: 0; padding: 30px 16px; }
+    main { max-width: 1100px; margin: auto; }
+    h1 { margin-bottom: 4px; } p { color: #53657b; }
+    .panel { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 3px 20px #17243a12; margin-top: 22px; }
+    .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
+    label { display: block; font-weight: 650; font-size: 14px; margin-bottom: 6px; }
+    select, input { box-sizing: border-box; width: 100%; padding: 11px; border: 1px solid #bac6d6; border-radius: 7px; background: white; font-size: 15px; }
+    button { background: #1955b7; color: white; padding: 12px 22px; border: 0; border-radius: 7px; font-size: 15px; font-weight: 650; margin-top: 20px; cursor: pointer; }
+    button:hover { background: #12418e; }
+    .error { background: #fff0ef; border: 1px solid #e9a8a4; color: #8b1f19; padding: 13px; border-radius: 7px; margin-top: 18px; }
+    .chart { overflow-x: auto; } .chart svg { display: block; width: 100%; min-width: 700px; height: auto; }
+    small { color: #68798c; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Stock Data Visualizer</h1>
+  <p>Choose an S&amp;P 500 stock and generate a historical price chart using Alpha Vantage.</p>
+  <section class="panel">
+    <form method="post">
+      <div class="fields">
+        <div><label for="symbol">Stock symbol</label>
+          <select name="symbol" id="symbol" required>
+          {% for symbol in symbols %}<option value="{{ symbol }}" {% if values.symbol == symbol %}selected{% endif %}>{{ symbol }}</option>{% endfor %}
+          </select></div>
+        <div><label for="chart_type">Chart type</label>
+          <select name="chart_type" id="chart_type">
+            {% for type in ['Line', 'Bar'] %}<option value="{{ type }}" {% if values.chart_type == type %}selected{% endif %}>{{ type }}</option>{% endfor %}
+          </select></div>
+        <div><label for="function">Time series</label>
+          <select name="function" id="function">
+            {% for key, label in functions.items() %}<option value="{{ key }}" {% if values.function == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select></div>
+        <div><label for="start">Start date</label><input type="date" name="start" id="start" value="{{ values.start }}" required></div>
+        <div><label for="end">End date</label><input type="date" name="end" id="end" value="{{ values.end }}" required></div>
+      </div>
+      <button type="submit">Generate chart</button>
+    </form>
+    <p><small>{{ symbols|length }} symbols available (source: {{ source }}). Daily free-tier data may be limited to recent dates; some API series require a paid key.</small></p>
+    {% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+  </section>
+  {% if chart_svg %}
+  <section class="panel"><h2>Stock price chart</h2><div class="chart">{{ chart_svg|safe }}</div></section>
+  {% endif %}
+</main>
+</body>
+</html>
